@@ -1,5 +1,8 @@
 import random
 import time
+
+
+
 def init_gameboard():
     def generate_grid(size):
         # letter frequency list for English
@@ -10,14 +13,17 @@ def init_gameboard():
             grid.append(row)
         # insert a word for playability later...
         return grid
+
     gb = generate_grid(4)
     return gb
 
 
-def update_board(gb, score):
+def update_board(gb, score, time):
     for row in gb:
         print('|', ' '.join(row), '|')
-    print('⌈      ', score, '⌉')
+    padded_score = str(score).rjust(6)
+    padded_time = str(time).ljust(3)
+    print(f'⌈{padded_time}{padded_score}⌉')
 
 
 def isword(word):
@@ -77,25 +83,28 @@ if __name__ == '__main__':
     score = 0
     score_dict = {3: 100, 4: 400, 5: 800, 6: 1400, 7: 1800, 8: 2200}
     ansls = []
-    # init timer, if just enter then defaults to 60 seconds
-    timer = input('how much time(seconds): ')
-    if timer == '':
-        timer = -1
-    # game start
-    gamestart = input('press enter to start')
+
+    # # init timer, if just enter then defaults to 60 seconds
+    # timer = input('how much time(seconds): ')
+    # if timer == '':
+    #     timer = -1
+    # # game start
+    # gamestart = input('press enter to start')
+    timer = 60
+
     # prints board
-    update_board(gb, score)
+    update_board(gb, score, 0)
     # starts timer
     start = time.time()
     # init round time
     if timer == 0:
-        round_time = time.time()+100
+        round_time = time.time() + 100
     elif timer == -1:
         round_time = 60
     else:
         round_time = int(timer)
     # starts game condition
-    while (time.time()-start) < round_time and not game_over:
+    while (time.time() - start) < round_time and not game_over:
         ans = input('word: ')
         if ans == 'quit()':
             game_over = True
@@ -104,13 +113,14 @@ if __name__ == '__main__':
             ansls.append(ans.upper())
             length = len(list(ans))
             if length > 8:
-                round_score = 2200 + ((length-8)*400)
+                round_score = 2200 + ((length - 8) * 400)
             else:
                 round_score = score_dict[length]
             score += round_score
         else:
             print(status)
-        update_board(gb, score)
+        update_board(gb, score, int(time.time() - start))
     if score >= 124600:
         print('you\'re better than jay\'s brother!')
+    print('words:', len(ansls))
     print('final score:', score)
