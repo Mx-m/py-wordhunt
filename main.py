@@ -1,5 +1,5 @@
 import random
-
+import time
 def init_gameboard():
     def generate_grid(size):
         # letter frequency list for English
@@ -77,9 +77,28 @@ if __name__ == '__main__':
     score = 0
     score_dict = {3: 100, 4: 400, 5: 800, 6: 1400, 7: 1800, 8: 2200}
     ansls = []
+    # init timer, if just enter then defaults to 60 seconds
+    timer = input('how much time(seconds): ')
+    if timer == '':
+        timer = -1
+    # game start
+    gamestart = input('press enter to start')
+    # prints board
     update_board(gb, score)
-    while not game_over:
+    # starts timer
+    start = time.time()
+    # init round time
+    if timer == 0:
+        round_time = time.time()+100
+    elif timer == -1:
+        round_time = 60
+    else:
+        round_time = int(timer)
+    # starts game condition
+    while (time.time()-start) < round_time and not game_over:
         ans = input('word: ')
+        if ans == 'quit()':
+            game_over = True
         check, status = check_ans(gb, ans, ansls)
         if check:
             ansls.append(ans.upper())
@@ -92,4 +111,6 @@ if __name__ == '__main__':
         else:
             print(status)
         update_board(gb, score)
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    if score >= 124600:
+        print('you\'re better than jay\'s brother!')
+    print('final score:', score)
