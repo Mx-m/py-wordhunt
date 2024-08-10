@@ -2,6 +2,38 @@ import random
 import time
 
 
+def preprocess_words(filename, max_length, grid):
+    possible_words = []
+    starting_letters = list(cell for row in grid for cell in row)
+    with open(filename, 'r', encoding='utf-8') as f:
+        for line in f:
+            word = line.upper().strip()
+            if len(word) <= max_length:
+                for char in list(word):
+                    if char in starting_letters:
+                        if word.index(char) == len(word) - 1:
+                            possible_words.append(word)
+                    else:
+                        break
+    return possible_words
+
+
+def longest_word(gb):
+    max_length = len(gb) * len(gb[0])  # max possible length of a word in the grid
+    possible_words = preprocess_words('english.txt', max_length, gb)
+    longest_word = ''
+    for word in possible_words:
+        if len(word) <= len(longest_word):
+            continue  # skip if the word is not longer than the current longest word
+
+        check = check_ans(gb, word, [])
+        if check[0]:
+            longest_word = word
+            if len(longest_word) == max_length:
+                break  # exit if longest possible word found
+
+    return longest_word
+
 
 def init_gameboard():
     def generate_grid(size):
@@ -19,10 +51,13 @@ def init_gameboard():
 
 
 def update_board(gb, score, time):
+    time = int(time)
     for row in gb:
         print('|', ' '.join(row), '|')
-    padded_score = str(score).rjust(6)
-    padded_time = str(time).ljust(3)
+    if time < 0:
+        time = 0
+    padded_score = str(score).rjust(5)
+    padded_time = str(time).ljust(4)
     print(f'⌈{padded_time}{padded_score}⌉')
 
 
@@ -76,7 +111,6 @@ def check_ans(gb, ans, ansls):
     return False, 'already guessed'
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     game_over = False
     gb = init_gameboard()
@@ -84,16 +118,16 @@ if __name__ == '__main__':
     score_dict = {3: 100, 4: 400, 5: 800, 6: 1400, 7: 1800, 8: 2200}
     ansls = []
 
-    # # init timer, if just enter then defaults to 60 seconds
-    # timer = input('how much time(seconds): ')
-    # if timer == '':
-    #     timer = -1
-    # # game start
-    # gamestart = input('press enter to start')
-    timer = 60
+    # init timer, if just enter then defaults to 60 seconds
+    timer = input('how much time(seconds): ')
+    if timer == '':
+        timer = -1
+    # game start
+    gamestart = input('press enter to start')
+    # timer = 60
 
     # prints board
-    update_board(gb, score, 0)
+    update_board(gb, score, timer)
     # starts timer
     start = time.time()
     # init round time
@@ -119,8 +153,12 @@ if __name__ == '__main__':
             score += round_score
         else:
             print(status)
-        update_board(gb, score, int(time.time() - start))
+        timeleft = round_time - int(time.time() - start)
+        update_board(gb, score, timeleft)
     if score >= 124600:
         print('you\'re better than jay\'s brother!')
     print('words:', len(ansls))
-    print('final score:', score)
+    print('words found:', ansls)
+    longest_word = longest_word(gb)
+    print('longest word possible:', longest_word)
+    print('\nfinal score:', score)
